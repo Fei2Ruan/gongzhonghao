@@ -1,5 +1,6 @@
 """Tavily搜索工具封装"""
 import os
+from datetime import datetime
 from typing import Optional
 from tavily import TavilyClient
 
@@ -11,17 +12,21 @@ def get_tavily_client() -> TavilyClient:
     return TavilyClient(api_key=api_key)
 
 
-def search(query: str, max_results: int = 5, search_depth: str = "basic") -> list[dict]:
-    """执行搜索，返回结果列表"""
+def search(query: str, max_results: int = 5, search_depth: str = "basic", days: int = 0) -> list[dict]:
+    """执行搜索，返回结果列表。days=0 表示不限时间"""
     client = get_tavily_client()
+    kwargs = {
+        "query": query,
+        "max_results": max_results,
+        "search_depth": search_depth,
+        "include_answer": True,
+        "include_raw_content": False,
+    }
+    if days > 0:
+        kwargs["days"] = days
+
     try:
-        response = client.search(
-            query=query,
-            max_results=max_results,
-            search_depth=search_depth,
-            include_answer=True,
-            include_raw_content=False,
-        )
+        response = client.search(**kwargs)
         results = []
         if response.get("answer"):
             results.append({"type": "answer", "content": response["answer"], "url": ""})
@@ -40,10 +45,14 @@ def search(query: str, max_results: int = 5, search_depth: str = "basic") -> lis
 
 def search_trending_topics() -> list[dict]:
     """搜索当前热点话题"""
+    year = datetime.now().year
+    today = datetime.now().strftime("%Y年%m月%d日")
     queries = [
-        "今日热点新闻 社会 2026",
-        "知乎热榜 今日话题",
-        "微博热搜 今天",
+        f"今日热点新闻 社会 {today}",
+        f"{year}年 微博热搜 头条",
+        f"知乎热榜 今日话题 {today}",
+        f"抖音热搜 热门话题 {today}",
+        f"抖音热榜 {today}",
     ]
     all_results = []
     client = get_tavily_client()
@@ -61,6 +70,6 @@ def search_trending_topics() -> list[dict]:
     return all_results
 
 
-def deep_search(query: str, max_results: int = 8) -> list[dict]:
+def deep_search(query: str, max_results: int = 8, days: int = 0) -> list[dict]:
     """深度搜索，用于资料收集"""
-    return search(query, max_results=max_results, search_depth="advanced")
+    return search(query, max_results=max_results, search_depth="advanced", days=days)

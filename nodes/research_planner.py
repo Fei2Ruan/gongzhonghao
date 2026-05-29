@@ -1,6 +1,7 @@
 """节点2: 规划搜索策略"""
 import json
 import os
+from datetime import datetime
 from openai import OpenAI
 from prompts.writer_prompt import RESEARCH_PLANNER_PROMPT
 
@@ -15,10 +16,13 @@ def get_client():
 def research_planner_node(state: dict) -> dict:
     print(f"📋 [规划] 为「{state['topic']}」规划搜索策略...")
     client = get_client()
+    now = datetime.now()
 
     prompt = RESEARCH_PLANNER_PROMPT.format(
         topic=state["topic"],
         angle=state.get("topic_angle", ""),
+        current_date=now.strftime("%Y年%m月%d日"),
+        year=str(now.year),
     )
     resp = client.chat.completions.create(
         model="deepseek-chat",

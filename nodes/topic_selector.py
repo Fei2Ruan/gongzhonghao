@@ -1,6 +1,7 @@
 """节点1: 选题"""
 import json
 import os
+from datetime import datetime
 from openai import OpenAI
 from tools.search_tool import search_trending_topics
 from prompts.topic_prompt import TOPIC_SELECTOR_PROMPT
@@ -32,9 +33,11 @@ def topic_selector_node(state: dict) -> dict:
     used = state.get("used_topics", [])
     used_text = "\n".join(f"- {t}" for t in used) if used else "（无）"
 
+    current_date = datetime.now().strftime("%Y年%m月%d日")
     prompt = TOPIC_SELECTOR_PROMPT.format(
         trending_content=trending_text,
         used_topics=used_text,
+        current_date=current_date,
     )
 
     client = get_client()
