@@ -1,0 +1,47 @@
+name: 生成公众号文章
+
+on:
+  schedule:
+    # 北京时间每天早上 8:00 (UTC 0:00)
+    - cron: "0 0 * * *"
+  workflow_dispatch:  # 支持手动触发
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 生成 .env
+        run: |
+          cat > .env << 'EOF'
+          DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY }}
+          TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}
+          WECHAT_APP_ID=${{ secrets.WECHAT_APP_ID }}
+          WECHAT_APP_SECRET=${{ secrets.WECHAT_APP_SECRET }}
+          UNSPLASH_ACCESS_KEY=${{ secrets.UNSPLASH_ACCESS_KEY }}
+          PEXELS_API_KEY=${{ secrets.PEXELS_API_KEY }}
+          DRY_RUN=false
+          DRAFT_ONLY=true
+          EOF
+
+      - name: 生成文章并推送到公众号草稿
+        run: python main.py
+        env:
+          TZ: Asia/Shanghai
+
+      - name: 保存产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: article-output
+          path: output/
