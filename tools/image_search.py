@@ -30,7 +30,7 @@ def _baidu_image_search(keyword: str) -> Optional[str]:
             f"https://image.baidu.com/search/acjson"
             f"?tn=resultjson_com&ipn=rj&ct=201326592&is=&fp=result"
             f"&queryWord={quote(keyword)}&cl=2&lm=-1&ie=utf-8&oe=utf-8"
-            f"&word={quote(keyword)}&pn=0&rn=10&{ts}="
+            f"&word={quote(keyword)}&pn=0&rn=30&{ts}="
         )
         resp = requests.get(url, headers=headers, timeout=10)
         data = resp.json()
@@ -39,10 +39,18 @@ def _baidu_image_search(keyword: str) -> Optional[str]:
         for item in items:
             if not item:
                 continue
-            # thumbURL 是可直接访问的图片链接
             img_url = item.get("thumbURL") or item.get("middleURL")
-            if img_url and img_url.startswith("http"):
-                return img_url
+            if not img_url or not img_url.startswith("http"):
+                continue
+
+            # 过滤竖图：从 URL 中提取尺寸，只保留横图 (w > h)
+            dims = re.findall(r'[?&]w=(\d+)&h=(\d+)', img_url)
+            if dims:
+                w, h = int(dims[0][0]), int(dims[0][1])
+                if h > w:
+                    continue  # 跳过竖图
+
+            return img_url
     except Exception:
         pass
 
