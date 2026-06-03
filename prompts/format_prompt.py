@@ -1,6 +1,27 @@
 """排版提示词 - 爆款推文风格"""
 
-FORMAT_PROMPT = """你是顶尖微信公众号视觉设计师，你的每一篇排版都能带来10w+阅读。你的任务是将以下Markdown文章转换为一篇**视觉上让人忍不住分享**的爆款推文HTML。
+FORMAT_PROMPT = """你是微信公众号排版专家。将以下Markdown文章转换为HTML。生成的HTML最终要粘贴到微信公众号编辑器里，所以只能使用微信兼容的技术。
+
+## 微信兼容规则（违反即失效）
+
+微信公众号会强制删除以下内容，绝对禁止：
+- SVG 标签（完全删除）
+- linear-gradient / radial-gradient（背景渐变变空白）
+- border-image（不生效）
+- text-decoration-style: wavy（波浪下划线不生效）
+- display: flex（不稳定，常被清除）
+- box-shadow（复杂阴影被清除）
+- @font-face / 动画 / transition
+- ::before / ::after 伪元素
+
+微信安全的技术（放心用）：
+- 纯色 background-color、border、border-left、border-bottom
+- dashed / dotted / double / solid 边框样式
+- padding、margin、border-radius
+- font-size、font-weight、color、line-height、letter-spacing
+- opacity、text-align、display: inline-block
+- Unicode 字符（· &ldquo; &rdquo; &mdash; 等）
+- <table> 做简单的左右布局（flex的替代方案）
 
 ## 文章信息
 - 选题：{topic}
@@ -10,122 +31,146 @@ FORMAT_PROMPT = """你是顶尖微信公众号视觉设计师，你的每一篇�
 ## 文章内容（Markdown）
 {markdown_content}
 
-## 设计目标：让内容"活"起来
+## 色彩
 
-好的爆款排版，读者扫一眼就被吸引、读到金句就想截图、看完就想转发。设计要有个性，但不过分花哨——**在高级感和传播力之间找到最佳平衡**。
+- 主文字：深灰 #2c2c2c 或 #1a1a1a
+- 文章背景：body 浅色（如 #f8f8f4），卡片纯白
+- 强调色 1-2 个（用于边框、加粗、装饰），按主题选：
+  - 社会/思考 → 暗红 #b5343a / 藏蓝 #3a5a8c
+  - 职场/生活 → 暖橙 #c07a3c / 墨绿 #4a7c59
+  - 情感/心理 → 藕紫 #8b5e7a / 暖咖 #8b6f5e
+- 金句底色：极浅色 #faf8f5 或 #f4f6f9
 
-### 一、色彩体系
+## 各元素规范
 
-根据文章主题和情绪，选择一套有辨识度的配色方案：
+**H1 标题**：24-28px，加粗，居中或左对齐，下方留白 28-36px
 
-- **主文字色**：深灰或深棕（如 #2c2c2c、#1a1a1a），不用纯黑
-- **背景色**：body 用柔和浅色（暖白、浅灰、极浅米色），文章卡片用纯白或微暖白
-- **强调色**：选 1-2 个有质感的颜色作为全文点缀——用于标题装饰、金句边框、加粗文字、分割线等。根据文章调性选择：
-  - 社会/思考类 → 暗红、藏蓝、深棕
-  - 职场/生活类 → 暖橙、墨绿、琥珀
-  - 情感/心理类 → 玫瑰金、藕紫、暖咖
-  - 科技/数据类 → 靛蓝、青灰、深蓝
-- 辅助色（可选）：一个极浅的背景色用于金句卡片的底色（如 #faf8f5、#f4f6f9）
+**H2 二级标题**：18-22px，加粗，上留白 32-40px，下留白 10-14px。装饰三选一：
+- A. 小圆点前缀：`<span style="display: inline-block; width: 7px; height: 7px; background: #b5343a; border-radius: 50%; margin-right: 10px; vertical-align: middle;"></span>标题`
+- B. 短下划线后缀：标题下方 `<div style="width: 35px; height: 2px; background: #b5343a; margin-top: 6px; border-radius: 1px;"></div>`
+- C. 纯文字加粗，不加任何装饰
 
-### 二、各元素设计规范
+装饰越少越亲切，不要用竖线和数字编号。
 
-**H1 文章标题**：
-- 字号 24-28px，加粗，1.3-1.4 倍行高
-- 可以左对齐加左侧竖线（3-4px，强调色），也可以居中干干净净
-- 下方留白 24-32px
-- 标题是文章的脸面，要有气势
-
-**H2 二级标题**（重点设计）：
-- 字号 18-22px，加粗
-- 以下几种风格任选其一，全文统一：
-  - A. 左侧粗竖线（4-6px，强调色）+ 左侧内边距 12-16px
-  - B. 短下划线（2-3px 高，强调色，30-50px 宽）
-  - C. 数字编号（如"01"/"一."）用强调色 + 标题文字
-- 上下留白充足（上 36-48px，下 12-18px），制造章节呼吸感
-- H2 是文章节奏的分界点，要醒目但不喧宾夺主
-
-**H3 三级标题**：
-- 字号 16-18px，加粗
-- 左侧细竖线（2-3px，比强调色略浅）或无装饰
-- 与正文形成层级对比
+**H3 三级标题**：16-18px，加粗，可用 2px 左侧细竖线
 
 **正文段落**：
-- 字号 15-16px，行高 1.8-1.9
-- 段间距 14-18px
-- 两端对齐，阅读体验流畅
-- 长段落适当拆分，保持手机端每段不超过 6-8 行
+```html
+<p style="font-size: 15px; color: #2c2c2c; line-height: 1.85; margin: 0 0 16px 0; text-align: justify;">段落内容</p>
+```
+保持原文的段落结构，不要额外拆分或合并。
 
-**强调/加粗文字**：
-- 用强调色加粗，这是全文最重要的视觉锚点
-- 关键结论、核心观点、震撼数字——这些必须用强调色突出
-- 每 2-3 段至少有一处强调，制造阅读节奏
+**强调/加粗**（混搭，不要只用一种）：
 
-**金句/引用块**（爆款的核心——读者截图的素材）：
-- 这是全文最需要精心设计的元素。金句必须让人想截图转发
-- 推荐风格（选一种，全文统一）：
-  - A. 左侧粗竖线（4-6px，强调色）+ 浅背景底色 + 舒适内边距 + 字号比正文大 2-3px
-  - B. 居中大字排版，字号 18-22px，上下留白充裕，加引号装饰
-  - C. 浅色圆角卡片包裹，圆角 6-12px
-- 开头摘要金句尤其要醒目——这是读者决定是否继续读的关键
+- A. 高亮底纹（最推荐）：
+  `<span style="background-color: #FFF3CD; padding: 2px 4px; font-weight: bold; color: #1a1a1a;">文字</span>`
+  暖色系用 #FFF3CD，冷色系用 #E3F2FD，情感类用 #FCE4EC
 
-**数据亮点**（可选）：
-- 如果文章中有震撼的数字（如"68%"、"22%"），可以单独成行
-- 用大字号（28-36px）+ 强调色 + 加粗展示，下方跟小字说明
-- 不要做成复杂的多列卡片——一个数据一行即可
+- B. 虚线底划线：
+  `<span style="font-weight: bold; color: #1a1a1a; border-bottom: 2px dashed #b5343a; padding-bottom: 2px;">文字</span>`
 
-**图片区域**（极其重要——必须严格遵守）：
-- Markdown 中的 `[IMAGE: 描述]` 标记，必须转换为以下结构
-- **src 属性必须原封不动保留 `IMAGE_PLACEHOLDER_` 前缀**，系统会在后续自动替换为真实图片
-- **绝对禁止**自己编造图片URL、禁止使用 data:image/svg+xml 占位图、禁止使用 base64 编码
-- 代码模板（直接复制使用，不要修改 src 的格式，不要加图片说明文字）：
+- C. 左侧小竖线：
+  `<span style="border-left: 3px solid #b5343a; padding-left: 10px; font-weight: bold;">文字</span>`
+
+- D. 加大加粗加色（适合数字）：
+  `<span style="font-size: 18px; font-weight: bold; color: #b5343a;">68%</span>`
+
+每 2-3 段至少一处强调，变化才有节奏。
+
+**金句/引用块**（全文 3-5 处，混搭使用，让读者想截图）：
+
+- A. 大引号卡片（最有质感）：
+```html
+<blockquote style="margin: 32px 0; padding: 24px 20px; background-color: #faf8f5; border-radius: 8px; border: none;">
+  <p style="font-size: 40px; color: #b5343a; margin: 0 0 -10px 0; line-height: 0.8; opacity: 0.3; font-family: serif;">&ldquo;</p>
+  <p style="font-size: 17px; color: #2c2c2c; line-height: 1.9; margin: 0;">金句内容</p>
+  <p style="text-align: right; font-size: 40px; color: #b5343a; margin: -10px 0 0 0; line-height: 0.6; opacity: 0.3; font-family: serif;">&rdquo;</p>
+</blockquote>
+```
+
+- B. 左侧粗竖线 + 浅底（经典不出错）：
+```html
+<blockquote style="margin: 28px 0; padding: 18px 20px; border-left: 4px solid #b5343a; background-color: #faf8f5; border-top: none; border-right: none; border-bottom: none;">
+  <p style="font-size: 17px; color: #2c2c2c; line-height: 1.9; margin: 0;">金句内容</p>
+</blockquote>
+```
+
+- C. 居中 + 上下虚线（冲击力最强）：
+```html
+<div style="margin: 36px 0; text-align: center; padding: 24px 16px;">
+  <p style="margin: 0 0 16px 0; border-top: 1px dashed #b5343a; width: 60px; margin-left: auto; margin-right: auto; opacity: 0.6;"></p>
+  <p style="font-size: 20px; font-weight: bold; color: #1a1a1a; line-height: 1.8; margin: 0;">金句内容</p>
+  <p style="margin: 16px 0 0 0; border-top: 1px dashed #b5343a; width: 60px; margin-left: auto; margin-right: auto; opacity: 0.6;"></p>
+</div>
+```
+
+- D. 双线左边框 + 圆角（数据型金句）：
+```html
+<blockquote style="margin: 28px 0; padding: 20px; border-left: 4px double #b5343a; background-color: #fafafa; border-radius: 0 6px 6px 0; border-top: none; border-right: none; border-bottom: none;">
+  <p style="font-size: 16px; color: #2c2c2c; line-height: 1.9; margin: 0;">金句内容</p>
+</blockquote>
+```
+
+- E. 纯色条块 + 引号（极简）：
+```html
+<table style="margin: 28px 0; border-collapse: collapse; width: 100%;"><tr>
+  <td style="width: 5px; background-color: #b5343a; border-radius: 3px;"></td>
+  <td style="padding: 16px 20px;"><p style="font-size: 18px; font-weight: bold; color: #1a1a1a; line-height: 1.8; margin: 0;">"金句内容"</p></td>
+</tr></table>
+```
+
+开头摘要金句优先用 A 或 B，让读者一进来就被吸引。
+
+**数据亮点**（慎用，全文最多 1-2 处）：大字号 28-36px + 强调色 + 加粗。数字是故事的配角，不是主角。
+
+**图片**（严格按此模板）：
 ```html
 <div style="margin: 28px 0;">
   <img src="IMAGE_PLACEHOLDER_关键词" style="width: 100%; display: block; border-radius: 4px;" />
 </div>
 ```
 
-**分割线**：
-- 可以用简单的 1px 横线（#e0e0e0）
-- 也可以用短装饰线（居中，宽 40-60px，高 1-2px，强调色）
-- 上下留白 32-40px
+**分隔线**（混搭 3-4 种类型）：
 
-**列表**：
-- 无序列表用圆点，有序列表用数字
-- 符号颜色可以用强调色点缀
-- 行高与正文一致
+- A. 细线居中（最常用）：
+```html
+<p style="margin: 36px auto; text-align: center; border-top: 1px solid #e0ddd6; width: 30%;"></p>
+```
 
-**作者署名**：
-- 右对齐，字号 14px，颜色 #999 或 #aaa
-- "银猫有话说"
-- 上方可用一条浅色分割线隔开
+- B. 三点式（简洁优雅）：
+```html
+<p style="margin: 32px 0; text-align: center; letter-spacing: 14px; color: #ccc; font-size: 10px;">&middot; &middot; &middot;</p>
+```
 
-### 三、爆款排版的黄金法则
+- C. 短装饰线（大章节转换）：
+```html
+<p style="margin: 40px 0; text-align: center;"><span style="display: inline-block; width: 45px; border-top: 2px solid #b5343a; opacity: 0.4;"></span></p>
+```
 
-1. **金句即弹药**：全文至少 3-5 处需要特殊设计的金句块，这些是读者的"截图素材"
-2. **强调色是钩子**：关键结论、震撼数字、反常识观点——用强调色抓住眼球
-3. **留白即呼吸**：章节之间、标题前后、金句上下都要有充足留白，不要让读者窒息
-4. **节奏要起伏**：正文（平稳）→ 金句（高潮）→ 图片（喘息）→ 正文（平稳），制造阅读节奏
-5. **手机端优先**：每段不超过屏幕的 1/3，长句要拆分，字号不小于 14px
+- D. 虚线分隔（轻松话题）：
+```html
+<p style="margin: 36px auto; text-align: center; border-top: 1px dashed #d0d0d0; width: 25%;"></p>
+```
 
-### 四、必须遵守的规则
+- E. 纯留白（最克制）：
+```html
+<div style="margin: 48px 0;"></div>
+```
 
-1. 所有样式必须内联（style="..."），绝对不能使用 class、id、外部CSS
-2. 不能使用 <script>、<link>、<iframe> 标签
-3. 输出**完整的HTML文档**（包含 <!DOCTYPE html>、<html>、<head>、<meta charset="UTF-8">、<body>）
-4. body 设浅色背景，文章主体白色卡片 max-width: 677px 居中
-5. 手机端优先：字号不小于14px，行高不小于1.6
-6. 输出文章标题（H1）+ 作者署名
-7. 整体要有**呼吸感**和**高级感**——设计有品质，但不浮夸
+**列表**：无序圆点，有序数字，行高同正文。
 
-### 五、不要做的事
+**作者署名**：右对齐，14px，颜色 #999，上方一条浅色分隔线，写"银猫有话说"。
 
-- 不要用渐变背景
-- 不要用装饰性符号做分割线（如 ✦ ◆ ▼ ▶ ★ 等）
-- 不要用超过 2 种强调色
-- 不要用大面积的鲜艳背景色
-- 不要用复杂的多层阴影
-- 不要用怪异字体
+## 必须遵守
 
-**核心心法：好的爆款排版 = 高级的克制 + 精准的强调。让读者在 3 秒内被视觉吸引，30 秒内被金句击中，3 分钟内被内容征服。**
+1. 所有样式内联 style="..."，禁止 class、id、外部CSS
+2. 禁止 <script>、<link>、<iframe>
+3. 输出完整 HTML 文档（<!DOCTYPE html> 到 </html>）
+4. body 浅色背景，文章主体白色卡片 max-width: 677px 居中
+5. 字号 ≥ 14px，行高 ≥ 1.6
+6. 禁止 SVG、渐变、flex、box-shadow、wavy 下划线——所有装饰用纯色 + 边框 + Unicode 字符实现
+7. 不超过 2 种强调色，不要大面积鲜艳背景，不要怪异字体
+
+注意：所有文字必须使用简体中文，不得出现繁体字。
 
 只输出完整的HTML代码，不要任何解释。"""

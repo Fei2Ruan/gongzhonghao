@@ -30,7 +30,8 @@ def topic_selector_node(state: dict) -> dict:
         f"- {r['title']}: {r['content'][:150]}" for r in trending[:15] if r.get("title")
     )
 
-    used = state.get("used_topics", [])
+    # used = state.get("used_topics", [])
+    used = ["鞠萍姐姐退休了","A股极致分化下的打工人"]
     used_text = "\n".join(f"- {t}" for t in used) if used else "（无）"
 
     current_date = datetime.now().strftime("%Y年%m月%d日")
