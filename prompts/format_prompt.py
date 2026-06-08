@@ -123,7 +123,12 @@ FORMAT_PROMPT = """你是微信公众号排版专家。将以下Markdown文章�
 
 **数据亮点**（慎用，全文最多 1-2 处）：大字号 28-36px + 强调色 + 加粗。数字是故事的配角，不是主角。
 
-**图片**（严格按此模板）：
+**图片**（极其重要，必须执行）：
+- Markdown 中的 `[IMAGE: 描述]` 标记，必须转换为下面的图片HTML结构
+- **src 属性必须原封不动保留 `IMAGE_PLACEHOLDER_` 前缀 + URL编码后的描述文字**，系统会在后续自动替换为真实图片
+- **绝对禁止**自己编造图片URL、禁止使用 data:image/svg+xml 占位图、禁止使用 base64 编码
+- **绝对禁止**跳过或忽略 `[IMAGE: 描述]` 标记——每个标记都必须转成对应的 HTML 图片块
+- 代码模板（直接复制使用，将"关键词"替换为 URL 编码后的图片描述）：
 ```html
 <div style="margin: 28px 0;">
   <img src="IMAGE_PLACEHOLDER_关键词" style="width: 100%; display: block; border-radius: 4px;" />

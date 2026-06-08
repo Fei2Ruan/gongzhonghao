@@ -31,7 +31,7 @@ def topic_selector_node(state: dict) -> dict:
     )
 
     # used = state.get("used_topics", [])
-    used = ["鞠萍姐姐退休了","A股极致分化下的打工人"]
+    used = ["鞠萍姐姐退休了","A股极致分化下的打工人","埃博拉新毒株来了","高考报名少了45万","高考报名为何少了45万"]
     used_text = "\n".join(f"- {t}" for t in used) if used else "（无）"
 
     current_date = datetime.now().strftime("%Y年%m月%d日")
