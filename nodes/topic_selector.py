@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from openai import OpenAI
 from tools.search_tool import search_trending_topics
-from prompts.topic_prompt import TOPIC_SELECTOR_PROMPT
+from prompts.topic_prompt import TOPIC_SELECTOR_PROMPT, TOPIC_ANGLE_PROMPT
 
 
 def get_client():
@@ -24,6 +24,26 @@ def chat(client, prompt: str, model: str = "deepseek-chat", max_tokens: int = 51
 
 
 def topic_selector_node(state: dict) -> dict:
+    # 如果已指定话题，直接用
+    if state.get("topic"):
+        topic = state["topic"]
+        angle = state.get("topic_angle")
+        if not angle:
+            print(f"📌 [选题] 使用指定话题：{topic}，AI生成切入角度...")
+            client = get_client()
+            raw = chat(client, TOPIC_ANGLE_PROMPT.format(topic=topic), max_tokens=256)
+            angle = raw.strip().strip('"').strip("'")
+        else:
+            print(f"📌 [选题] 使用指定话题：{topic} | 角度：{angle}")
+        return {
+            **state,
+            "topic": topic,
+            "topic_angle": angle,
+            "topic_reason": "用户指定话题",
+            "topic_keywords": [],
+            "status": "topic_selected",
+        }
+
     print("🔍 [选题] 搜索热点话题...")
     trending = search_trending_topics()
     trending_text = "\n".join(
@@ -31,7 +51,7 @@ def topic_selector_node(state: dict) -> dict:
     )
 
     # used = state.get("used_topics", [])
-    used = ["鞠萍姐姐退休了","A股极致分化下的打工人","埃博拉新毒株来了","高考报名少了45万","高考报名为何少了45万"]
+    used = ["鞠萍姐姐退休了","A股极致分化下的打工人","埃博拉新毒株来了","高考报名少了45万","高考报名为何少了45万","高考数学考爽了？","自费买AI Token上班"]
     used_text = "\n".join(f"- {t}" for t in used) if used else "（无）"
 
     current_date = datetime.now().strftime("%Y年%m月%d日")

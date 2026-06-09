@@ -55,6 +55,18 @@ def main():
         default=[],
         help="已使用过的选题列表（避免重复）",
     )
+    parser.add_argument(
+        "--topic",
+        type=str,
+        default=None,
+        help="指定话题标题，跳过AI自动选题直接写这个话题",
+    )
+    parser.add_argument(
+        "--angle",
+        type=str,
+        default=None,
+        help="指定切入角度（配合 --topic 使用，不填则由AI生成）",
+    )
     args = parser.parse_args()
 
     # dry-run模式
@@ -87,6 +99,11 @@ def main():
         "used_topics": args.used_topics,
         "format_retry_count": 0,
     }
+    if args.topic:
+        print(f"📌 指定话题：{args.topic}")
+        initial_state["topic"] = args.topic
+        if args.angle:
+            initial_state["topic_angle"] = args.angle
 
     try:
         final_state = agent.invoke(initial_state)
